@@ -51,3 +51,40 @@ def run_demo():
 if __name__ == "__main__":
     run_demo()
    
+
+# ---Öğrenci1 modül1: Base Class---
+class KanalC:
+    def __init__(self,id_c, id_sahip, baslik, tur, durum):
+        self.id_c = id_c
+        self.id_sahip = id_sahip
+        self.baslik = baslik
+        self.tur = tur       #oyun, eğitim, vlog, müzik vb.
+        self.durum = durum   #aktif, askıya_alındı, silindi, onay_bekliyor
+
+    def ac(self):
+        self.durum = "aktif"
+
+    def durdur(self):
+        self.durum = "askıya_alındı"   
+
+    def bilgileri_goster(self):
+        print(f"{self.baslik} ({self.tur}) - {self.durum}") 
+
+# --- Öğrenci1: Subclasses ---
+class BireyselKanal(KanalC):
+    def __init__(self, id_c, id_sahip, baslik, tur, durum, abone_sayisi, renk_temasi):
+        super().__init__(id_c, id_sahip, baslik, tur, durum)   
+        self.abone_sayisi = abone_sayisi
+        self.renk_temasi =  renk_temasi
+
+    def bilgileri_goster(self):
+        print(f"{self.baslik} ({self.tur}) - {self.durum} - Abone: {self.abone_sayisi}")
+
+    def abone_ekle(self,miktar):
+        self.abone_sayisi += miktar
+
+    def tema_değistir(self,yeni_renk):
+        self.renk_temasi = yeni_renk           
+
+
+            
