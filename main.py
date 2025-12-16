@@ -53,7 +53,8 @@ if __name__ == "__main__":
    
 
 # ---Öğrenci1 modül1: Base Class---
-class KanalC:
+from abc import ABC, abstractmethod
+class KanalC(ABC):
     def __init__(self,id_c, id_sahip, baslik, tur, durum):
         self.id_c = id_c
         self.id_sahip = id_sahip
@@ -69,6 +70,13 @@ class KanalC:
 
     def bilgileri_goster(self):
         print(f"{self.baslik} ({self.tur}) - {self.durum}") 
+@abstractmethod
+def kanal_tipi(self):
+    pass
+
+@abstractmethod
+def ek_bilgiler(self):
+    pass
 
 # --- Öğrenci1: Subclasses ---
 class BireyselKanal(KanalC):
@@ -86,5 +94,48 @@ class BireyselKanal(KanalC):
     def tema_değistir(self,yeni_renk):
         self.renk_temasi = yeni_renk           
 
+def kanal_tipi(self):
+    return "bireysel"
 
-            
+def ek_bilgiler(self):
+    return {
+        "abone_sayisi": self.abone_sayisi,
+        "renk temasi": self.renk_temasi
+        }
+
+# KANAL DEPOSU (repository katmanı)
+
+class KanalDeposu:
+    def __init__(self):
+        self.kanallar = {}
+
+    def kanal_ekle(self, kanal):
+        self.kanallar[kanal.id_c] = kanal
+
+    def kanal_sil(self, kanal_id):
+        if kanal_id in self.kanallar:
+            self.kanallar[kanal_id].sil()
+
+    def id_ile_bul(self, kanal_id):
+        return self.kanallar.get(kanal_id)
+
+    def tum_kanallari_getir(self):
+        return list(self.kannallar.valuest())
+
+    def duruma_gore_listele(self,durum):
+        #Örn: sadece "Aktif" kanallar
+        return [
+            kanal for kanal in self.kanallar.values()
+            if kanal.durum == durum
+        ]  
+    def ture_gore_listele(self,tur):
+        return [
+            kanal for kanal in self.kanallar.values()
+            if kanal.tur == tur
+        ]
+    def kanal_tipine_göre_listele(self,tip):
+        return [
+            kanal for kanal in self.kanallar.values()
+            if kanal.kanal_tipi() == tip
+        
+            ]              
