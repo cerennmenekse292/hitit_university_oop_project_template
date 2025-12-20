@@ -7,6 +7,7 @@ class KanalDeposu:
 
     def __init__(self):
         self.kanallar = {}
+        self.islem_kayitlari = []
 
     def kanal_ekle(self, kanal):
         """
@@ -14,14 +15,7 @@ class KanalDeposu:
         """
         self.kanallar[kanal.id_c] = kanal
 
-    def kanal_sil(self, kanal_id):
-        """
-        Kanalı tamamen silmez, durumunu 'silindi' yapar.
-        """
-        kanal = self.kanallar.get(kanal_id)
-        if kanal:
-            kanal.sil()
-
+    
     def id_ile_bul(self, kanal_id):
         """
         Kanal ID'sine göre kanal döndürür.
@@ -60,3 +54,47 @@ class KanalDeposu:
             kanal for kanal in self.kanallar.values()
             if kanal.kanal_tipi() == tip
         ]
+    def kanal_var_mi(self, kanal_id):
+        """
+        Belirtilen ID ile kanal olup olmadığını kontrol eder.
+        """
+        return kanal_id in self.kanallar
+
+    def aktif_kanallari_getir(self):
+        """
+        Sadece aktif durumdaki kanalları döndürür.
+        """
+        return [
+            kanal for kanal in self.kanallar.values()
+            if kanal.durum == "aktif"
+        ]
+
+    def basliga_gore_ara(self, kelime):
+        """
+        Kanal başlığında kelime geçen kanalları listeler.
+        """
+        sonuc = []
+
+        for kanal in self.kanallar.values():
+            if kelime.lower() in kanal.baslik.lower():
+                sonuc.append(kanal)
+
+        return sonuc
+
+    def kanal_sayisi(self):
+        """
+        Toplam kanal sayısını döndürür.
+        """
+        return len(self.kanallar)
+
+    def islem_kaydi_ekle(self, mesaj):
+        """
+        Repository üzerinde yapılan işlemleri kaydeder.
+        """
+        self.islem_kayitlari.append(mesaj)
+
+    def islem_kayitlarini_getir(self):
+        """
+        Yapılan tüm işlemleri döndürür.
+        """
+        return self.islem_kayitlari

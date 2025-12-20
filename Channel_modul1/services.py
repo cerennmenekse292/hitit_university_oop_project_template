@@ -1,5 +1,5 @@
 """
-Kanal Yönetim Modülü – Servis Katmanı
+Kanal Yönetim Modülü1 – Servis Katmanı
 
 Bu dosya, kanal nesneleri üzerinde yapılan iş kurallarını içerir.
 Veri erişimi repository katmanı üzerinden sağlanır.
@@ -9,6 +9,59 @@ işlemleri bu katmanda merkezi olarak yönetilir.
 from Channel_modul1.repository import KanalRepository
 from Channel_modul1.base import KanalC
 
+# -------------------- CUSTOM EXCEPTIONS --------------------
+
+class KanalHatasi(Exception):
+    """Tüm kanal hataları için temel sınıf."""
+    pass
+
+
+class KanalBulunamadiHatasi(KanalHatasi):
+    """Kanal bulunamadığında fırlatılır."""
+    pass
+
+
+class KanalValidasyonHatasi(KanalHatasi):
+    """Kanal kurallara uymadığında fırlatılır."""
+    pass
+
+# -------------------- VALIDATION SERVICE --------------------
+
+class KanalValidationService:
+    """
+    Kanal nesneleri için iş kurallarını ve doğrulamaları yapar.
+    Repository ile doğrudan iletişim kurmaz.
+    """
+
+    GECERLI_TURLER = ["oyun", "egitim", "vlog", "muzik", "teknoloji"]
+
+    def kanal_dogrula(self, kanal: KanalC):
+        if not kanal.baslik or kanal.baslik.strip() == "":
+            raise KanalValidasyonHatasi("Kanal başlığı boş olamaz")
+
+        if kanal.tur not in self.GECERLI_TURLER:
+            raise KanalValidasyonHatasi("Geçersiz kanal türü")
+
+        if kanal.durum not in ["onay_bekliyor", "aktif"]:
+            raise KanalValidasyonHatasi("Başlangıç durumu geçersiz")
+
+        self._kanal_tipine_ozel_kurallar(kanal)
+
+    def _kanal_tipine_ozel_kurallar(self, kanal: KanalC):
+        tip = kanal.kanal_tipi()
+
+        if tip == "bireysel":
+            if kanal.abone_sayisi < 0:
+                raise KanalValidasyonHatasi("Abone sayısı negatif olamaz")
+
+        elif tip == "marka":
+            if not kanal.sirket_adi:
+                raise KanalValidasyonHatasi("Marka kanalı şirket adı içermeli")
+
+        elif tip == "cocuk":
+            if not kanal.ebeveyn_onayi:
+                raise KanalValidasyonHatasi("Çocuk kanalı için ebeveyn onayı zorunlu")
+
 class KanalService:
     """
     KanalService, kanal yönetim modülündeki ana iş kurallarını içerir.
@@ -17,9 +70,12 @@ class KanalService:
 
     def __init__(self, repository: KanalRepository):
         self.repository = repository
+        self.validation_service = KanalValidationService()
 
     # -------------------- OLUŞTURMA --------------------
     def kanal_olustur(self, kanal: KanalC):
+        self.validation_service.kanal_dogrula(kanal)
+
         if not isinstance(kanal, KanalC):
             raise TypeError("Geçersiz kanal nesnesi")
 
