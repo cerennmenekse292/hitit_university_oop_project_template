@@ -238,3 +238,146 @@ class KanalRaporlamaServisi:
             kanal for kanal in self.repository.tum_kanallari_getir()
             if kanal.durum == "aktif"
         ]
+class KanalIstatistikServisi:
+    def __init__(self, repository):
+        self.repository = repository
+
+    def en_cok_aboneli_kanal(self):
+        kanallar = self.repository.tum_kanallari_getir()
+        if not kanallar:
+            return None
+
+        max_kanal = kanallar[0]
+        for kanal in kanallar:
+            if hasattr(kanal, "abone_sayisi"):
+                if kanal.abone_sayisi > getattr(max_kanal, "abone_sayisi", 0):
+                    max_kanal = kanal
+        return max_kanal
+
+    def en_az_aboneli_kanal(self):
+        kanallar = self.repository.tum_kanallari_getir()
+        sonuc = None
+        for kanal in kanallar:
+            if hasattr(kanal, "abone_sayisi"):
+                if sonuc is None or kanal.abone_sayisi < sonuc.abone_sayisi:
+                    sonuc = kanal
+        return sonuc
+
+    def ortalama_abone_sayisi(self):
+        toplam = 0
+        sayac = 0
+        for kanal in self.repository.tum_kanallari_getir():
+            if hasattr(kanal, "abone_sayisi"):
+                toplam += kanal.abone_sayisi
+                sayac += 1
+        return toplam / sayac if sayac > 0 else 0
+
+    def abone_araligina_gore_listele(self, min_abone, max_abone):
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if hasattr(kanal, "abone_sayisi"):
+                if min_abone <= kanal.abone_sayisi <= max_abone:
+                    sonuc.append(kanal)
+        return sonuc
+
+
+class KanalGecmisServisi:
+    def __init__(self, repository):
+        self.repository = repository
+
+    def kanal_olusturma_kaydi(self, kanal):
+        mesaj = f"Kanal oluşturuldu: {kanal.baslik}"
+        self.repository.islem_kaydi_ekle(mesaj)
+
+    def kanal_silme_kaydi(self, kanal):
+        mesaj = f"Kanal silindi: {kanal.baslik}"
+        self.repository.islem_kaydi_ekle(mesaj)
+
+    def kanal_durum_degisim_kaydi(self, kanal, eski, yeni):
+        mesaj = f"{kanal.baslik} durumu {eski} -> {yeni}"
+        self.repository.islem_kaydi_ekle(mesaj)
+
+    def tum_kayitlari_getir(self):
+        return self.repository.islem_kayitlarini_getir()
+
+
+class KanalFiltrelemeServisi:
+    def __init__(self, repository):
+        self.repository = repository
+
+    def baslik_ile_baslayanlar(self, harf):
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if kanal.baslik.lower().startswith(harf.lower()):
+                sonuc.append(kanal)
+        return sonuc
+
+    def baslik_uzunluguna_gore(self, min_uzunluk):
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if len(kanal.baslik) >= min_uzunluk:
+                sonuc.append(kanal)
+        return sonuc
+
+    def pasif_kanallar(self):
+        return [
+            kanal for kanal in self.repository.tum_kanallari_getir()
+            if kanal.durum != "aktif"
+        ]
+
+
+class KanalGuvenlikServisi:
+    def __init__(self, repository):
+        self.repository = repository
+
+    def silinmis_kanal_kontrol(self, kanal_id):
+        kanal = self.repository.id_ile_bul(kanal_id)
+        if not kanal:
+            return False
+        return kanal.durum == "silindi"
+
+    def kanal_erisim_kontrol(self, kanal_id, kullanici_id):
+        kanal = self.repository.id_ile_bul(kanal_id)
+        if not kanal:
+            return False
+        return kanal.id_sahip == kullanici_id
+
+
+class KanalBakimServisi:
+    def __init__(self, repository):
+        self.repository = repository
+
+    def silinmisleri_temizle(self):
+        silinecekler = []
+        for kanal_id, kanal in self.repository.kanallar.items():
+            if kanal.durum == "silindi":
+                silinecekler.append(kanal_id)
+
+        for kanal_id in silinecekler:
+            del self.repository.kanallar[kanal_id]
+
+    def askida_olanlari_listele(self):
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if kanal.durum == "askıya_alındı":
+                sonuc.append(kanal)
+        return sonuc
+
+    def sistem_durumu_raporu(self):
+        rapor = {
+            "toplam": 0,
+            "aktif": 0,
+            "pasif": 0,
+            "silinmis": 0
+        }
+
+        for kanal in self.repository.tum_kanallari_getir():
+            rapor["toplam"] += 1
+            if kanal.durum == "aktif":
+                rapor["aktif"] += 1
+            elif kanal.durum == "silindi":
+                rapor["silinmis"] += 1
+            else:
+                rapor["pasif"] += 1
+
+        return rapor
