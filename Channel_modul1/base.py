@@ -20,6 +20,7 @@ class KanalC(ABC):
         self.durum = "aktif"
 
     def durdur(self):
+
         self.durum = "askıya_alındı"
 
     def sil(self):

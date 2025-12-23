@@ -64,19 +64,29 @@ class KanalC(ABC):
 
     def ac(self):
         self.durum = "aktif"
+        self._log("kanal açıldı")
 
     def durdur(self):
-        self.durum = "askıya_alındı"   
+        self.durum = "askıya_alındı" 
+        self.log("kanal askıya alındı") 
+
+    def sil(self):
+        self.durum ="silindi"
+        self._log("kanal silindi") 
 
     def bilgileri_goster(self):
         print(f"{self.baslik} ({self.tur}) - {self.durum}") 
-@abstractmethod
-def kanal_tipi(self):
-    pass
 
-@abstractmethod
-def ek_bilgiler(self):
-    pass
+    def _log(self,mesaj):
+        self.islem_gecmisi.append(mesaj)
+
+    @abstractmethod
+    def kanal_tipi(self):
+        pass
+
+    @abstractmethod
+    def ek_bilgiler(self):
+        pass
 
 # --- Öğrenci1: Subclasses ---
 class BireyselKanal(KanalC):

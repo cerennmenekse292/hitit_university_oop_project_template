@@ -1,4 +1,12 @@
-# Kanal verilerinin tutulduğu repository katmanı
+"""
+Kanal Yönetim Modülü1 – Repository Katmanı
+
+Bu dosya, kanal verilerinin saklanması ve yönetilmesini sağlar.
+Kanalların eklenmesi, silinmesi, güncellenmesi ve sorgulanması
+işlemleri bu katmanda merkezi olarak yürütülür.
+Veriye doğrudan erişim ve depolama işlemleri burada gerçekleştirilir.
+"""
+
 
 class KanalDeposu:
     """

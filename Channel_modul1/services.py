@@ -6,7 +6,7 @@ Veri erişimi repository katmanı üzerinden sağlanır.
 Kanal oluşturma, güncelleme, durum değiştirme ve listeleme
 işlemleri bu katmanda merkezi olarak yönetilir.
 """
-from Channel_modul1.repository import KanalRepository
+from Channel_modul1.repository import KanalDeposu
 from Channel_modul1.base import KanalC
 
 # -------------------- CUSTOM EXCEPTIONS --------------------
@@ -55,12 +55,13 @@ class KanalValidationService:
                 raise KanalValidasyonHatasi("Abone sayısı negatif olamaz")
 
         elif tip == "marka":
-            if not kanal.sirket_adi:
+            if not kanal.marka_adi:
                 raise KanalValidasyonHatasi("Marka kanalı şirket adı içermeli")
 
         elif tip == "cocuk":
-            if not kanal.ebeveyn_onayi:
-                raise KanalValidasyonHatasi("Çocuk kanalı için ebeveyn onayı zorunlu")
+            if kanal.veli_izni is None:
+                raise KanalValidasyonHatasi("Çocuk kanalı için veli bilgisi zorunlu")
+
 
 class KanalService:
     """
@@ -68,7 +69,7 @@ class KanalService:
     Kanal oluşturma, güncelleme, arama ve listeleme işlemlerini yürütür.
     """
 
-    def __init__(self, repository: KanalRepository):
+    def __init__(self, repository: KanalDeposu):
         self.repository = repository
         self.validation_service = KanalValidationService()
 
@@ -151,7 +152,7 @@ class KanalDurumYonetici:
         "silindi"
     ]
 
-    def __init__(self, repository: KanalRepository):
+    def __init__(self, repository: KanalDeposu):
         self.repository = repository
 
     def durum_gecerli_mi(self, durum):
@@ -199,7 +200,7 @@ class KanalRaporlamaServisi:
     basit istatistiksel raporlar üretir.
     """
 
-    def __init__(self, repository: KanalRepository):
+    def __init__(self, repository: KanalDeposu):
         self.repository = repository
 
     def toplam_kanal_sayisi(self):
