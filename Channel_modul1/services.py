@@ -382,3 +382,105 @@ class KanalBakimServisi:
                 rapor["pasif"] += 1
 
         return rapor
+    
+
+
+
+# ==========================================================
+# EK SERVİS – KANAL ANALİZ VE DENETİM SERVİSİ
+# ==========================================================
+
+class KanalAnalizServisi:
+    """
+    KanalAnalizServisi, kanallar üzerinde
+    ileri seviye analiz ve denetim işlemleri yapar.
+
+    Amaç:
+    - Aktif / pasif oranlarını hesaplamak
+    - Sorunlu kanalları tespit etmek
+    - Sistem sağlığı hakkında özet bilgi vermek
+    """
+
+    def __init__(self, repository):
+        self.repository = repository
+
+    def aktif_kanal_orani(self):
+        kanallar = self.repository.tum_kanallari_getir()
+        if not kanallar:
+            return 0
+
+        aktif = 0
+        for kanal in kanallar:
+            if kanal.durum == "aktif":
+                aktif += 1
+
+        return aktif / len(kanallar)
+
+    def pasif_kanal_orani(self):
+        kanallar = self.repository.tum_kanallari_getir()
+        if not kanallar:
+            return 0
+
+        pasif = 0
+        for kanal in kanallar:
+            if kanal.durum != "aktif":
+                pasif += 1
+
+        return pasif / len(kanallar)
+
+    def onay_bekleyen_kanallar(self):
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if kanal.durum == "onay_bekliyor":
+                sonuc.append(kanal)
+        return sonuc
+
+    def askida_olan_kanallar(self):
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if kanal.durum == "askıya_alındı":
+                sonuc.append(kanal)
+        return sonuc
+
+    def sorunlu_kanallar(self):
+        """
+        Sorunlu kanal:
+        - Başlığı çok kısa olan
+        - Pasif durumda olan
+        """
+        sonuc = []
+        for kanal in self.repository.tum_kanallari_getir():
+            if len(kanal.baslik) < 5 or kanal.durum != "aktif":
+                sonuc.append(kanal)
+        return sonuc
+
+    def kanal_saglik_raporu(self):
+        rapor = {
+            "toplam": 0,
+            "aktif": 0,
+            "pasif": 0,
+            "onay_bekleyen": 0,
+            "askida": 0
+        }
+
+        for kanal in self.repository.tum_kanallari_getir():
+            rapor["toplam"] += 1
+
+            if kanal.durum == "aktif":
+                rapor["aktif"] += 1
+            elif kanal.durum == "onay_bekliyor":
+                rapor["onay_bekleyen"] += 1
+                rapor["pasif"] += 1
+            elif kanal.durum == "askıya_alındı":
+                rapor["askida"] += 1
+                rapor["pasif"] += 1
+            elif kanal.durum == "silindi":
+                rapor["pasif"] += 1
+
+        return rapor
+
+    def ozet_yazdir(self):
+        rapor = self.kanal_saglik_raporu()
+        print("=== KANAL SİSTEM SAĞLIK RAPORU ===")
+        for anahtar, deger in rapor.items():
+            print(f"{anahtar}: {deger}")

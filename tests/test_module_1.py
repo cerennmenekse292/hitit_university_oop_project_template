@@ -2,8 +2,10 @@
 
 """
 Test Dosyası: Kanal Yönetim Modülü
+
 Bu dosya, KanalService ve KanalDeposu için kapsamlı testler içerir.
 Amaç:
+
 - CRUD işlemlerini test etmek
 - Durum geçişlerini kontrol etmek
 - Arama ve filtreleme fonksiyonlarını doğrulamak
@@ -11,8 +13,27 @@ Amaç:
 """
 
 from Channel_modul1.repository import KanalDeposu
-from Channel_modul1.services import KanalService, KanalDurumYonetici, KanalRaporlamaServisi
-from Channel_modul1.implementations import BireyselKanal, MarkaKanali, CocukKanali
+
+from Channel_modul1.services import (
+    KanalService,
+    KanalDurumYonetici,
+    KanalRaporlamaServisi,
+    KanalAnalizServisi,
+    KanalValidationService,
+    KanalIstatistikServisi,
+    KanalFiltrelemeServisi,
+    KanalGuvenlikServisi,
+    KanalBakimServisi,
+    KanalValidasyonHatasi
+)
+
+from Channel_modul1.implementations import (
+    BireyselKanal,
+    MarkaKanali,
+    CocukKanali
+)
+
+
 
 def test_kanal_modulu():
     # -------------------- SETUP --------------------
@@ -83,20 +104,11 @@ def test_kanal_modulu():
 
     print("\n=== TESTLER TAMAMLANDI ===")
 
-if __name__ == "__main__":
-    test_kanal_modulu()
 # ==========================================================
 # EK TESTLER – HATA, VALIDASYON VE SINIR DURUMLARI
 # ==========================================================
 
-from Channel_modul1.services import (
-    KanalValidationService,
-    KanalIstatistikServisi,
-    KanalFiltrelemeServisi,
-    KanalGuvenlikServisi,
-    KanalBakimServisi
-)
-from Channel_modul1.services import KanalValidasyonHatasi
+
 
 
 def test_hatali_kanal_olusturma():
@@ -204,7 +216,7 @@ def test_filtreleme_servisi():
 
     assert len(filtre.baslik_ile_baslayanlar("A")) == 1
     assert len(filtre.baslik_uzunluguna_gore(10)) == 2
-    
+
     # Pasif kanalları repository üzerinden say
     pasif_sayisi = len([k for k in depo.tum_kanallari_getir() if k.durum != "aktif"])
     assert len(filtre.pasif_kanallar()) == pasif_sayisi
@@ -233,6 +245,29 @@ def test_guvenlik_ve_bakim_servisleri():
     assert depo.id_ile_bul(50) is not None
 
     print("✔ Güvenlik ve bakım servisleri test edildi")
+
+# En son tüm testler çalıştırılacak ve sonuçlar terminalde gösterilecek
+def test_kanal_analiz_servisi():
+    print("\n-- Kanal Analiz Servisi Testi --")
+
+    depo = KanalDeposu()
+    service = KanalService(depo)
+
+    service.kanal_olustur(
+        BireyselKanal(60, 1, "Aktif Kanal", "vlog", "aktif", 50, "mavi")
+    )
+    service.kanal_olustur(
+        BireyselKanal(61, 2, "Pasif Kanal", "vlog", "onay_bekliyor", 10, "kırmızı")
+    )
+
+    analiz = KanalAnalizServisi(depo)
+
+    assert analiz.aktif_kanal_orani() == 0.5
+    assert analiz.pasif_kanal_orani() == 0.5
+    assert len(analiz.onay_bekleyen_kanallar()) == 1
+
+    print("✔ Kanal analiz servisi çalışıyor")
+
 if __name__ == "__main__":
     print("\n### TÜM TESTLER MANUEL OLARAK ÇALIŞTIRILIYOR ###\n")
 
@@ -243,5 +278,12 @@ if __name__ == "__main__":
     test_istatistik_servisi()
     test_filtreleme_servisi()
     test_guvenlik_ve_bakim_servisleri()
+    test_kanal_analiz_servisi()
 
     print("\n### TÜM TESTLER BAŞARIYLA TAMAMLANDI ###")
+
+
+    
+       
+
+  

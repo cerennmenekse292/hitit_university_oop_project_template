@@ -213,6 +213,10 @@ def demo_calistir():
     print(f"En az aboneli kanal: {en_az.baslik} ({en_az.abone_sayisi} abone)")
     print("Ortalama abone sayısı:", istatistik_servisi.ortalama_abone_sayisi())
 
+    from Channel_modul1.services import KanalAnalizServisi
+
+    analiz_servisi = KanalAnalizServisi(repository)
+    analiz_servisi.ozet_yazdir()
 
     # DEMO TAMAMLANDI
     print("\n=== DEMO TAMAMLANDI ===")
